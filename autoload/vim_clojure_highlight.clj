@@ -1,10 +1,10 @@
 (ns vim-clojure-highlight
   (:require [clojure.string :as string]))
 
+(def ^:private clojure-core (find-ns 'clojure.core))
+
 (defn- external-refs [ns]
-  (->> (ns-refers ns)
-       (remove #(contains? '#{clojure.core cljs.core}
-                           (ns-name (:ns (meta (peek %))))))))
+  (remove #(= clojure-core (:ns (meta (peek %)))) (ns-refers ns)))
 
 (defn- aliased-refs [ns]
   (reduce
