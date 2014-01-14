@@ -52,6 +52,8 @@ statements when a `*.clj` file is loaded.
 
 This will fail silently if fireplace is unable to connect to an nREPL server.
 
+Reload your buffer with `:e` to update syntax matches.
+
 Reference highlighting can be toggled with the following command:
 
 ```vim
