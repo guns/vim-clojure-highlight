@@ -1,10 +1,9 @@
 " vim-clojure-highlight
 
-let s:highlight_buf = join(readfile(globpath(&runtimepath, 'autoload/vim_clojure_highlight.clj')), "\n")
-
 function! vim_clojure_highlight#require()
 	if fireplace#evalparse("(find-ns 'vim-clojure-highlight)") ==# ''
-		call fireplace#session_eval('(do ' . s:highlight_buf . ')')
+		let buf = join(readfile(globpath(&runtimepath, 'autoload/vim_clojure_highlight.clj')), "\n")
+		call fireplace#session_eval('(do ' . buf . ')')
 	endif
 endfunction
 
