@@ -8,7 +8,7 @@ function! vim_clojure_highlight#require()
 	endif
 endfunction
 
-function! vim_clojure_highlight#highlight_references()
+function! vim_clojure_highlight#syntax_match_references()
 	try
 		call vim_clojure_highlight#require()
 		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command '" . fireplace#ns() . ")")

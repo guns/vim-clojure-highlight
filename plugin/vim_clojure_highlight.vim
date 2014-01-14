@@ -6,5 +6,5 @@ endif
 
 augroup vim_clojure_highlight
 	autocmd!
-	autocmd BufRead,BufNewFile *.clj if g:clojure_highlight_references | call vim_clojure_highlight#highlight_references() | endif
+	autocmd BufRead,BufNewFile *.clj if g:clojure_highlight_references | call vim_clojure_highlight#syntax_match_references() | endif
 augroup END
