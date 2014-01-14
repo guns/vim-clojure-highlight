@@ -1,0 +1,23 @@
+*vim-clojure-highlight.txt*	Highlight Clojure ns references
+
+Requires |fireplace|.
+
+On |BufRead| and |BufNewFile| of a *.clj file, |syn-keyword| statements are
+generated and executed to highlight referred and aliased vars.
+
+This will fail silently if fireplace is unable to connect to an nREPL server.
+
+					*ToggleClojureHighlightReferences*
+
+Reference highlighting can be toggled with the following command:
+>
+	:ToggleClojureHighlightReferences
+<
+					*g:clojure_highlight_references*
+
+and can be disabled by default:
+>
+	let g:clojure_highlight_references = 0
+<
+
+ vim:tw=78:noet:sw=8:sts=8:ts=8:ft=help:norl:
