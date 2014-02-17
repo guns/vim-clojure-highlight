@@ -22,10 +22,21 @@
               (instance? clojure.lang.MultiFn f)) :fn
           :else :def)))
 
+(def ^:private syntax-reserved-words
+  #{"contains" "oneline" "fold" "display" "extend" "concealends" "conceal"
+    "cchar" "contained" "containedin" "nextgroup" "transparent" "skipwhite"
+    "skipnl" "skipempty"})
+
+;; Wrap the last characte[r] to get around Vim's errors re. reserved words
+(defn- fix-reserved-words [w]
+  (if (syntax-reserved-words w)
+    (string/replace w #"(.)$" "[$1]")
+    w))
+
 (defn- syntax-keyword-statements [seq-name->var]
   (mapv
     (fn [[type sks]]
-      (let [names (string/join \space (mapv first sks))]
+      (let [names (string/join \space (mapv (comp fix-reserved-words str first) sks))]
         (case type
           :macro (str "syntax keyword clojureMacro " names)
           :fn    (str "syntax keyword clojureFunc " names)
