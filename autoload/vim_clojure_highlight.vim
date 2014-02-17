@@ -7,7 +7,7 @@ endif
 
 function! vim_clojure_highlight#existing_session()
 	if !g:vim_clojure_highlight_require_existing_session ||
-		\ (exists('g:fireplace_nrepl_sessions') && len(g:fireplace_nrepl_sessions))
+	\ (exists('g:fireplace_nrepl_sessions') && len(g:fireplace_nrepl_sessions))
 		return 1
 	endif
 	return 0
