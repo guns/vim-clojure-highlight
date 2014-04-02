@@ -17,6 +17,7 @@ function! vim_clojure_highlight#syntax_match_references()
 	try
 		call s:require()
 		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command '" . fireplace#ns() . ")")
+		let &syntax = &syntax
 	catch /./
 	endtry
 endfunction
