@@ -1,44 +1,33 @@
+```
+      _                 .-.       _                  .-.   _     .-.  .-.  _     .-.  .-.
+     :_;                : :      :_;                 : :  :_;    : :  : : :_;    : : .' `.
+.-..-.-,-.,-.,-. .  .--.: :  .--..-.-..-.--. .--.  . : `-..-..--.: `-.: : .-..--.: `-`. .'
+: `; : : ,. ,. :`,`'  ..: :_' .; : : :; : ..' '_.:`,`: .. : ' .; : .. : :_: ' .; : .. : :
+`.__.:_:_;:_;:_;   `.__.`.__`.__.: `.__.:_; `.__.'   :_;:_:_`._. :_;:_`.__:_`._. :_;:_:_;
+                               .-. :                         .-. :           .-. :
+                               `._.'                         `._.'           `._.'
+```
 
+Extend builtin syntax highlighting to local, referred, and aliased vars in
+Clojure buffers.
 
-           _
-          (_)
-    __   ___ _ __ ___
-    \ \ / / | '_ ` _ \
-     \ V /| | | | | | |
-      \_/ |_|_| |_| |_|
-
-
-          _       _
-         | |     (_)
-      ___| | ___  _ _   _ _ __ ___
-     / __| |/ _ \| | | | | '__/ _ \
-    | (__| | (_) | | |_| | | |  __/
-     \___|_|\___/| |\__,_|_|  \___|
-                _/ |
-               |__/
-     _     _       _     _ _       _     _
-    | |   (_)     | |   | (_)     | |   | |
-    | |__  _  __ _| |__ | |_  __ _| |__ | |_
-    | '_ \| |/ _` | '_ \| | |/ _` | '_ \| __|
-    | | | | | (_| | | | | | | (_| | | | | |_
-    |_| |_|_|\__, |_| |_|_|_|\__, |_| |_|\__|
-              __/ |           __/ |
-             |___/           |___/
-
-
-
-Extend builtin syntax highlighting to referred and aliased vars in Clojure
-buffers.
+![demo](https://guns.github.io/vim-clojure-highlight/demo.gif)
 
 This is essentially a re-implementation of the dynamic highlighting feature
 from Meikel Brandmeyer's VimClojure project.
 
 # Requires:
 
+* [vim-clojure-static](https://github.com/guns/vim-clojure-static)
 * [fireplace.vim](https://github.com/tpope/vim-fireplace)
 
-If you'd like this ported to another REPL plugin, please create an issue! This
-can be done quite easily.
+While Vim ships with `vim-clojure-static`, this plugin uses a feature from a
+very [recent version][].
+
+If you'd like `vim-clojure-highlight` ported to another REPL plugin, please
+create an issue! This can be done quite easily.
+
+[recent version]: https://github.com/guns/vim-clojure-static/commit/d776ecac5528031a0eb5f293c572c1e35aacd75a
 
 # Installation
 
@@ -47,21 +36,14 @@ please refer to [Pathogen](https://github.com/tpope/vim-pathogen).
 
 # Usage
 
-`vim-clojure-highlight` installs a hook that executes the relevant `syntax`
-statements when a `*.clj` file is loaded.
+`vim-clojure-highlight` installs an autocommand that detects and highlights
+local vars, ns-refers, and aliased references every time a `*.clj` file is
+(re)loaded.
 
 This will fail silently if fireplace is unable to connect to an nREPL server.
 
-Reload your buffer with `:e` to update syntax matches.
+Reload your buffer with `:e` to update syntax matches. Alternately, use the
+`:ClojureHighlightReferences` command in a custom autocommand or mapping to do
+the same.
 
-Reference highlighting can be toggled with the following command:
-
-```vim
-:ToggleClojureHighlightReferences
-```
-
-and can be disabled by default:
-
-```vim
-let g:clojure_highlight_references = 0
-```
+See the `doc/vim-clojure-highlight.txt` for more commands and options.
