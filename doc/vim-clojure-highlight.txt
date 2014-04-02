@@ -2,20 +2,29 @@
 
 Requires |fireplace|.
 
-On |BufRead| and |BufNewFile| of a *.clj file, |syn-keyword| statements are
-generated and executed to highlight referred and aliased vars.
+On |BufRead| of a *.clj file, |b:clojure_syntax_keywords| is populated with a
+dictionary of local, referred, and aliased vars keyed by identifier type. The
+syntax for the current buffer is then reloaded.
 
 This will fail silently if fireplace is unable to connect to an nREPL server.
 
-					*ToggleClojureHighlightReferences*
+					*:ClojureHighlightReferences*
 
-Reference highlighting can be toggled with the following command:
+Manually trigger highlighting for the current buffer. Useful in mappings.
+
+					*:ToggleClojureHighlightReferences*
+
+Toggle highlighting globally.
+
+					*g:clojure_highlight_local_vars*
+
+Local public vars are highlighted by default. To disable:
 >
-	:ToggleClojureHighlightReferences
+	let g:clojure_highlight_local_vars = 0
 <
 					*g:clojure_highlight_references*
 
-and can be disabled by default:
+vim-clojure-highlight can be disabled by default:
 >
 	let g:clojure_highlight_references = 0
 <

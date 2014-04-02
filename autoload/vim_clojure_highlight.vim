@@ -11,12 +11,15 @@ function! s:require()
 	endif
 endfunction
 
-function! vim_clojure_highlight#syntax_match_references()
+" Pass zero explicitly to prevent highlighting local vars
+function! vim_clojure_highlight#syntax_match_references(...)
 	if !s:session_exists() | return | endif
 
 	try
 		call s:require()
-		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command '" . fireplace#ns() . ")")
+		let ns = "'" . fireplace#ns()
+		let hi_locals = (a:0 && a:1 == 0) ? 'false' : 'true'
+		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command " . ns . " " . hi_locals . ")")
 		let &syntax = &syntax
 	catch /./
 	endtry

@@ -35,6 +35,7 @@
        (string/join \,)
        (format "let b:clojure_syntax_keywords = { %s }")))
 
-(defn ns-syntax-command [ns]
+(defn ns-syntax-command [ns hi-locals?]
   (syntax-keyword-dictionary (concat (external-refs ns)
-                                     (aliased-refs ns))))
+                                     (aliased-refs ns)
+                                     (when hi-locals? (ns-publics ns)))))
