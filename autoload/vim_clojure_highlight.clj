@@ -1,41 +1,101 @@
 (ns vim-clojure-highlight
-  (:require [clojure.string :as string]))
+  (:require [clojure.set :as set]
+            [clojure.string :as string])
+  (:import (clojure.lang MultiFn)))
 
-(def ^:private TYPE->SYNTAX-GROUP
-  {:macro "clojureMacro"
-   :fn "clojureFunc"
-   :def "clojureVariable"})
+;;;;;;;;;;;;;;;;;;;; Copied from vim-clojure-static.generate ;;;;;;;;;;;;;;;;;;;
 
-(defn- external-refs [ns]
-  (remove #(= "clojure.core" (-> % peek meta :ns str)) (ns-refers ns)))
+(defn- fn-var? [v]
+  (let [f @v]
+    (or (contains? (meta v) :arglists)
+        (fn? f)
+        (instance? MultiFn f))))
 
-(defn- aliased-refs [ns]
+(def special-forms
+  "http://clojure.org/special_forms"
+  '#{def if do let quote var fn loop recur throw try catch finally
+     monitor-enter monitor-exit . new set!})
+
+(def keyword-groups
+  "Special forms, constants, and every public var in clojure.core keyed by
+   syntax group name."
+  (let [exceptions '#{throw try catch finally}
+        builtins {"clojureConstant" '#{nil}
+                  "clojureBoolean" '#{true false}
+                  "clojureSpecial" (apply disj special-forms exceptions)
+                  "clojureException" exceptions
+                  "clojureCond" '#{case cond cond-> cond->> condp if-let
+                                   if-not if-some when when-first when-let
+                                   when-not when-some}
+                  ;; Imperative looping constructs (not sequence functions)
+                  "clojureRepeat" '#{doseq dotimes while}}
+        coresyms (set/difference (set (keys (ns-publics 'clojure.core)))
+                                 (set (mapcat peek builtins)))
+        group-preds [["clojureDefine" #(re-seq #"\Adef(?!ault)" (str %))]
+                     ["clojureMacro" #(:macro (meta (ns-resolve 'clojure.core %)))]
+                     ["clojureFunc" #(fn-var? (ns-resolve 'clojure.core %))]
+                     ["clojureVariable" identity]]]
+    (first
+      (reduce
+        (fn [[m syms] [group pred]]
+          (let [group-syms (set (filterv pred syms))]
+            [(assoc m group group-syms)
+             (set/difference syms group-syms)]))
+        [builtins coresyms] group-preds))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def core-symbol->syntax-group
+  "A map of symbols from clojure.core mapped to syntax group name."
+  (reduce
+    (fn [m [group syms]]
+      (reduce
+        (fn [m sym]
+          (assoc m sym group))
+        m syms))
+    {} keyword-groups))
+
+(defn clojure-core?
+  "Is this var from clojure.core?"
+  [var]
+  (= "clojure.core" (-> var meta :ns str)))
+
+(defn refers [ns include-clojure-core?]
+  (if include-clojure-core?
+    (ns-refers ns)
+    (remove (comp clojure-core? peek) (ns-refers ns))))
+
+(defn aliased-refers [ns]
   (mapcat
     (fn [[alias alias-ns]]
       (mapv #(vector (symbol (str alias \/ (first %))) (peek %))
             (ns-publics alias-ns)))
     (ns-aliases ns)))
 
-(defn- var-type [v]
+(defn var-type [v]
   (let [f @v m (meta v)]
-    (cond (:macro m) :macro
-          (or (contains? m :arglists)
-              (fn? f)
-              (instance? clojure.lang.MultiFn f)) :fn
-          :else :def)))
+    (cond (clojure-core? v) (core-symbol->syntax-group (:name m))
+          (:macro m) "clojureMacro"
+          (fn-var? v) "clojureFunc"
+          :else "clojureVariable")))
 
-(defn- syntax-keyword-dictionary [ns-refs]
+(defn syntax-keyword-dictionary [ns-refs]
   (->> ns-refs
        (group-by (comp var-type peek))
-       (mapv (fn [[type sym->vars]]
-               (->> sym->vars
+       (mapv (fn [[type sym->var]]
+               (->> sym->var
                     (mapv (comp pr-str str first))
                     (string/join \,)
-                    (format "'%s': [%s]" (TYPE->SYNTAX-GROUP type)))))
+                    (format "'%s': [%s]" type))))
        (string/join \,)
        (format "let b:clojure_syntax_keywords = { %s }")))
 
-(defn ns-syntax-command [ns hi-locals?]
-  (syntax-keyword-dictionary (concat (external-refs ns)
-                                     (aliased-refs ns)
-                                     (when hi-locals? (ns-publics ns)))))
+(defn ns-syntax-command [ns & opts]
+  (let [{:keys [local-vars clojure-core]
+         :or {local-vars true clojure-core true}} (apply hash-map opts)
+        refs (refers ns clojure-core)
+        dict (syntax-keyword-dictionary (concat refs
+                                                (aliased-refers ns)
+                                                (when local-vars (ns-publics ns))))]
+    (str "let b:clojure_syntax_without_core_keywords = " (if clojure-core 1 0)
+         " | " dict)))

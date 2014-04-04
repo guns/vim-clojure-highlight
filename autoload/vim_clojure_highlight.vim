@@ -17,9 +17,12 @@ function! vim_clojure_highlight#syntax_match_references(...)
 
 	try
 		call s:require()
-		let ns = "'" . fireplace#ns()
-		let hi_locals = (a:0 && a:1 == 0) ? 'false' : 'true'
-		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command " . ns . " " . hi_locals . ")")
+
+		let ns    = "'" . fireplace#ns()
+		let opts  = (a:0 > 0 && !a:1) ? ' :local-vars false' : ''
+		let opts .= (a:0 > 1 && !a:2) ? ' :clojure-core false' : ''
+
+		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command " . ns . opts . ")")
 		let &syntax = &syntax
 	catch /./
 	endtry
