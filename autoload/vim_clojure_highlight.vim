@@ -18,12 +18,13 @@ function! vim_clojure_highlight#syntax_match_references(...)
 	try
 		call s:require()
 
-		let ns    = "'" . fireplace#ns()
-		let opts  = (a:0 > 0 && !a:1) ? ' :local-vars false' : ''
-		let opts .= (a:0 > 1 && !a:2) ? ' :clojure-core false' : ''
+		let ns = "'" . fireplace#ns()
+		let opts = (a:0 > 0 && !a:1) ? ' :local-vars false' : ''
 
 		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command " . ns . opts . ")")
 		let &syntax = &syntax
 	catch /./
 	endtry
 endfunction
+
+" vim:noet:sw=8:ts=8

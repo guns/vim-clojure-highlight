@@ -60,11 +60,6 @@
   [var]
   (= "clojure.core" (-> var meta :ns str)))
 
-(defn refers [ns include-clojure-core?]
-  (if include-clojure-core?
-    (ns-refers ns)
-    (remove (comp clojure-core? peek) (ns-refers ns))))
-
 (defn aliased-refers [ns]
   (mapcat
     (fn [[alias alias-ns]]
@@ -87,15 +82,11 @@
                     (mapv (comp pr-str str first))
                     (string/join \,)
                     (format "'%s': [%s]" type))))
-       (string/join \,)
-       (format "let b:clojure_syntax_keywords = { %s }")))
+       (string/join \,)))
 
 (defn ns-syntax-command [ns & opts]
-  (let [{:keys [local-vars clojure-core]
-         :or {local-vars true clojure-core true}} (apply hash-map opts)
-        refs (refers ns clojure-core)
-        dict (syntax-keyword-dictionary (concat refs
+  (let [{:keys [local-vars] :or {local-vars true}} (apply hash-map opts)
+        dict (syntax-keyword-dictionary (concat (ns-refers ns)
                                                 (aliased-refers ns)
                                                 (when local-vars (ns-publics ns))))]
-    (str "let b:clojure_syntax_without_core_keywords = " (if clojure-core 1 0)
-         " | " dict)))
+    (str "let b:clojure_syntax_without_core_keywords = 1 | let b:clojure_syntax_keywords = {" dict "}")))
