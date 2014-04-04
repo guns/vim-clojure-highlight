@@ -13,6 +13,8 @@ Clojure buffers.
 
 ![demo](https://guns.github.io/vim-clojure-highlight/demo.gif)
 
+Exclusions from clojure.core (via `(:refer-clojure)`) are also reflected.
+
 This is essentially a re-implementation of the dynamic highlighting feature
 from Meikel Brandmeyer's VimClojure project.
 
@@ -27,7 +29,7 @@ very [recent version][].
 If you'd like `vim-clojure-highlight` ported to another REPL plugin, please
 create an issue! This can be done quite easily.
 
-[recent version]: https://github.com/guns/vim-clojure-static/commit/d776ecac5528031a0eb5f293c572c1e35aacd75a
+[recent version]: https://github.com/guns/vim-clojure-static/commit/82e2156ffbe7dd14990a328cf68f559cbda47376
 
 # Installation
 
