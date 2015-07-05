@@ -27,7 +27,7 @@ endfunction
 
 augroup vim_clojure_highlight
 	autocmd!
-	autocmd BufRead *.clj call s:syntax_match_references()
+	autocmd BufRead *.clj ClojureHighlightReferences
 augroup END
 
 command! -bar ToggleClojureHighlightReferences call s:toggle_clojure_highlight_references()
