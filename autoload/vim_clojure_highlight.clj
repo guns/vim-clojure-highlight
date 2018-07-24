@@ -67,6 +67,14 @@
             (ns-publics alias-ns)))
     (ns-aliases ns)))
 
+(defn all-ns-refers []
+  (mapcat
+    (fn [current-ns]
+      (mapv
+        #(vector (symbol (str current-ns \/ (first %))) (peek %))
+        (ns-publics current-ns)))
+    (map #(symbol (str %)) (all-ns))))
+
 (defn var-type [v]
   (let [f @v m (meta v)]
     (cond (clojure-core? v) (core-symbol->syntax-group (:name m))
@@ -87,6 +95,7 @@
 (defn ns-syntax-command [ns & opts]
   (let [{:keys [local-vars] :or {local-vars true}} (apply hash-map opts)
         dict (syntax-keyword-dictionary (concat (ns-refers ns)
+                                                (all-ns-refers)
                                                 (aliased-refers ns)
                                                 (when local-vars (ns-publics ns))))]
     (str "let b:clojure_syntax_without_core_keywords = 1 | let b:clojure_syntax_keywords = {" dict "}")))
