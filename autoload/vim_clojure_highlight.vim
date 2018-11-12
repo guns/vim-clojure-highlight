@@ -26,11 +26,9 @@ endfunction
 
 function! s:require(force)
 	if !a:force && s:evalparse("(nil? (find-ns 'vim-clojure-highlight))") == 0
-		echom "Loaded!"
 		return 0
 	endif
 
-	echom "Loading vim-clojure-highlight"
 	let ext = expand('%:e')
 	if ext != 'cljs' && ext != 'clj'
 		let ext = 'clj'
@@ -55,7 +53,6 @@ function! vim_clojure_highlight#syntax_match_references(...)
 	if !s:session_exists() | return | endif
 
 	try
-		echom "require(0)"
 		call s:require(0)
 
 		let ns = "'" . fireplace#ns()
@@ -63,7 +60,6 @@ function! vim_clojure_highlight#syntax_match_references(...)
 		if s:is_cljs()
 			let ns = ns . ' (ns-publics ' . ns . ')'
 		endif
-		echom "run highlight"
 		execute s:evalparse("(vim-clojure-highlight/ns-syntax-command " . ns . opts . ")")
 
 		let &syntax = &syntax

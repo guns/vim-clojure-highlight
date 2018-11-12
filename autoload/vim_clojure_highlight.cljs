@@ -8,70 +8,19 @@
           ; in clojurescript, all vars have :arglists, but it may be empty
           true)
         (fn? f)
-        #_(instance? MultiFn f))))
-
-(def special-forms
-  "http://clojure.org/special_forms"
-  '#{def if do let quote var fn loop recur throw try catch finally
-     monitor-enter monitor-exit . new set!})
-
-#_(def keyword-groups
-  "Special forms, constants, and every public var in clojure.core keyed by
-   syntax group name."
-  (let [exceptions '#{throw try catch finally}
-        builtins {"clojureConstant" '#{nil}
-                  "clojureBoolean" '#{true false}
-                  "clojureSpecial" (apply disj special-forms exceptions)
-                  "clojureException" exceptions
-                  "clojureCond" '#{case cond cond-> cond->> condp if-let
-                                   if-not if-some when when-first when-let
-                                   when-not when-some}
-                  ;; Imperative looping constructs (not sequence functions)
-                  "clojureRepeat" '#{doseq dotimes while}}
-        coresyms (clojure.set/difference (set (keys (ns-publics 'cljs.core)))
-                                 (set (mapcat peek builtins)))
-        group-preds [["clojureDefine" #(re-seq #"\Adef(?!ault)" (str %))]
-                     ["clojureMacro" #(:macro (meta (ns-resolve 'clojure.core %)))]
-                     ["clojureFunc" #(fn-var? (ns-resolve 'clojure.core %))]
-                     ["clojureVariable" identity]]]
-    (first
-      (reduce
-        (fn [[m syms] [group pred]]
-          (let [group-syms (set (filterv pred syms))]
-            [(assoc m group group-syms)
-             (clojure.set/difference syms group-syms)]))
-        [builtins coresyms] group-preds))))
+        (instance? MultiFn f))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-#_(def core-symbol->syntax-group
-  "A map of symbols from clojure.core mapped to syntax group name."
-  (reduce
-    (fn [m [group syms]]
-      (reduce
-        (fn [m sym]
-          (assoc m sym group))
-        m syms))
-    {} keyword-groups))
 
 (defn clojure-core?
   "Is this var from clojure.core?"
   [var]
   (= "cljs.core" (-> var meta :ns str)))
 
-(defn aliased-refers [ns]
-  []
-  #_(mapcat
-    (fn [[alias alias-ns]]
-      (mapv #(vector (symbol (str alias \/ (first %))) (peek %))
-            (ns-publics alias-ns)))
-    (ns-aliases ns)))
-
 (defn var-type [v]
   (let [f @v
         m (meta v)]
-    (cond ; (clojure-core? v) (core-symbol->syntax-group (:name m))
-          (:macro m) "clojureMacro"
+    (cond (:macro m) "clojureMacro" ;; NOTE: this doesn't actually work, sadly
           (fn-var? v) "clojureFunc"
           :else "clojureVariable")))
 
@@ -90,10 +39,9 @@
   ; NOTE: (ns-publics) is a macro in clojurescript!
   (let [{:keys [local-vars] :or {local-vars true}} (apply hash-map opts)
         dict (syntax-keyword-dictionary
-               publics
-               #_(concat (ns-refers ns)
-                       (aliased-refers ns)
-                       #_(when local-vars (ns-publics ns))))]
+               ; NOTE: ns-refers and ns-aliases don't exist in clojurescript
+               (when local-vars
+                 publics))]
     ; NOTE: don't disable core keywords just yet
     (str "let b:clojure_syntax_keywords = {" dict "}")))
 
