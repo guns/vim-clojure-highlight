@@ -63,7 +63,7 @@ function! vim_clojure_highlight#syntax_match_references(...)
 		execute s:evalparse("(vim-clojure-highlight/ns-syntax-command " . ns . opts . ")")
 
 		let &syntax = &syntax
-	catch /./
+	catch /.*/
 	endtry
 endfunction
 
