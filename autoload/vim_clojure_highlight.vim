@@ -5,8 +5,12 @@ function! s:session_exists()
 		return 1
 	endif
 	" Fall through in case we're using a newer version of fireplace.
-	let client = fireplace#client()
-	return has_key(client, 'transport')
+	try
+		let client = fireplace#client()
+		return has_key(client, 'transport')
+	catch /./
+	endtry
+	return 0
 endfunction
 
 function! s:require()
