@@ -1,7 +1,8 @@
 " vim-clojure-highlight
 
 function! s:session_exists()
-	return exists('g:fireplace_nrepl_sessions') && len(g:fireplace_nrepl_sessions)
+	let client = fireplace#client()
+	return has_key(client, 'transport')
 endfunction
 
 function! s:require()
