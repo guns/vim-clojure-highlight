@@ -28,6 +28,7 @@ endfunction
 augroup vim_clojure_highlight
 	autocmd!
 	autocmd BufRead *.clj ClojureHighlightReferences
+	autocmd BufRead *.cljs silent! ClojureHighlightReferences
 augroup END
 
 command! -bar ToggleClojureHighlightReferences call s:toggle_clojure_highlight_references()
