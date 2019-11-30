@@ -9,7 +9,8 @@ function! s:session_exists()
 endfunction
 
 function! s:require()
-	if fireplace#evalparse("(find-ns 'vim-clojure-highlight)") ==# ''
+	"echo(fireplace#evalparse("(find-ns 'vim-clojure-highlight)") != 'vim-clojure-highlight')
+	if fireplace#evalparse("(find-ns 'vim-clojure-highlight)") != 'vim-clojure-highlight'
 		let buf = join(readfile(globpath(&runtimepath, 'autoload/vim_clojure_highlight.clj')), "\n")
 		call fireplace#session_eval('(do ' . buf . ')')
 	endif
