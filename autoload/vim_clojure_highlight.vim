@@ -1,11 +1,16 @@
 " vim-clojure-highlight
 
 function! s:session_exists()
-	return exists('g:fireplace_nrepl_sessions') && len(g:fireplace_nrepl_sessions)
+	try
+		return fireplace#op_available('eval')
+	catch /./
+	endtry
+	return 0
 endfunction
 
 function! s:require()
-	if fireplace#evalparse("(find-ns 'vim-clojure-highlight)") ==# ''
+	"echo(fireplace#evalparse("(find-ns 'vim-clojure-highlight)") != 'vim-clojure-highlight')
+	if fireplace#evalparse("(find-ns 'vim-clojure-highlight)") != 'vim-clojure-highlight'
 		let buf = join(readfile(globpath(&runtimepath, 'autoload/vim_clojure_highlight.clj')), "\n")
 		call fireplace#session_eval('(do ' . buf . ')')
 	endif
