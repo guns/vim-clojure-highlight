@@ -1,30 +1,43 @@
 " vim-clojure-highlight
 
-function! s:session_exists()
-	return exists('g:fireplace_nrepl_sessions') && len(g:fireplace_nrepl_sessions)
+function! s:session_exists(platform)
+	try
+		let msg = a:platform.Query("nil")
+		return 1
+	catch /Fireplace: no live REPL connection/
+		return 0
+	endtry
 endfunction
 
-function! s:require()
-	if fireplace#evalparse("(find-ns 'vim-clojure-highlight)") ==# ''
+
+function! s:require(platform)
+	let msg = a:platform.Query("(find-ns 'vim-clojure-highlight)")
+	call fireplace#wait([msg])
+	if empty(msg)
 		let buf = join(readfile(globpath(&runtimepath, 'autoload/vim_clojure_highlight.clj')), "\n")
-		call fireplace#session_eval('(do ' . buf . ')')
+		let msg = a:platform.Message({"op": "load-file", "file": '(do ' . buf. ')'})
+		call fireplace#wait([msg])
 	endif
 endfunction
 
+
 " Pass zero explicitly to prevent highlighting local vars
 function! vim_clojure_highlight#syntax_match_references(...)
-	if !s:session_exists() | return | endif
+	let platform = fireplace#platform()
+	if !s:session_exists(platform)
+		echom "Can't load vim-clojure-highlight because no REPL connection was found; is Fireplace running?"
+		return
+	endif
 
-	try
-		call s:require()
+	call s:require(platform)
 
-		let ns = "'" . fireplace#ns()
-		let opts = (a:0 > 0 && !a:1) ? ' :local-vars false' : ''
+	let ns = "'" . fireplace#ns()
+	let opts = (a:0 > 0 && !a:1) ? ' :local-vars false' : ''
 
-		execute fireplace#evalparse("(vim-clojure-highlight/ns-syntax-command " . ns . opts . ")")
-		let &syntax = &syntax
-	catch /./
-	endtry
+	let msg = platform.Query("(vim-clojure-highlight/ns-syntax-command " . ns . opts . ")")
+	call fireplace#wait([msg])
+	execute msg
+	let &syntax = &syntax
 endfunction
 
 " vim:noet:sw=8:ts=8
